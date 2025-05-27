@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Практическое задание: Анализ компьютерной информации средствами операционной системы (анализ системных файлов, хронология событий)</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Play:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Local Bootstrap CSS -->
+    <link href="./assets/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Local Bootstrap Icons -->
+    <link rel="stylesheet" href="./assets/css/bootstrap-icons.css">
+    <!-- Local Prism.js для подсветки синтаксиса -->
+    <link href="./assets/css/prism-tomorrow.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Play', sans-serif;
+        }
+        
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin: 2rem auto;
+            max-width: 1200px;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px 20px 0 0;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+        
+        .hero-section h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            border-radius: 12px;
+            position: relative;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+        
+        .code-header {
+            background: #1a202c;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #4a5568;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .code-header .language {
+            color: #a0aec0;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .copy-btn {
+            background: #3182ce;
+            color: white;
+            border: none;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .copy-btn:hover {
+            background: #2c5282;
+            transform: translateY(-1px);
+        }
+        
+        .code-content {
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        
+        .code-content pre {
+            margin: 0;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        
+        .task-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            margin: 2rem 0;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+        .task-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .task-header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 1.5rem;
+        }
+        
+        .answer-header {
+            background: linear-gradient(135deg, #00b894, #00a085);
+            color: white;
+            padding: 1.5rem;
+        }
+        
+        .custom-tabs {
+            border: none;
+            background: transparent;
+        }
+        
+        .custom-tabs .nav-link {
+            border: none;
+            border-radius: 10px 10px 0 0;
+            background: #e9ecef;
+            color: #495057;
+            font-weight: 500;
+            margin-right: 0.25rem;
+            transition: all 0.3s ease;
+        }
+        
+        .custom-tabs .nav-link.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+        }
+        
+        .tab-content {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 0 10px 10px 10px;
+            padding: 1.5rem;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.2s;
+        }
+        
+        .checklist-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+        
+        .checklist-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #6c757d;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .checklist-checkbox:hover {
+            border-color: #0d6efd;
+            background: #e7f3ff;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .floating-nav {
+            position: fixed;
+            top: 50%;
+            right: 2rem;
+            transform: translateY(-50%);
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .floating-nav a {
+            display: block;
+            padding: 0.5rem;
+            color: #495057;
+            text-decoration: none;
+            border-radius: 8px;
+            margin: 0.25rem 0;
+            transition: all 0.2s;
+        }
+        
+        .floating-nav a:hover {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .floating-nav {
+                display: none;
+            }
+            
+            .hero-section h1 {
+                font-size: 2rem;
+            }
+            
+            .main-container {
+                margin: 1rem;
+                border-radius: 15px;
+            }
+        }
+
+
+    </style>
+</head>
+<body>
+
+
+    <!-- Floating Navigation -->
+    <div class="floating-nav d-none d-lg-block">
+        <a href="#preparation" title="Подготовка"><i class="bi bi-gear"></i></a>
+        <a href="#task1" title="Задание 1"><i class="bi bi-person-check"></i></a>
+        <a href="#task2" title="Задание 2"><i class="bi bi-cpu"></i></a>
+        <a href="#task3" title="Задание 3"><i class="bi bi-wifi"></i></a>
+        <a href="#task4" title="Задание 4"><i class="bi bi-pc-display"></i></a>
+        <a href="#report" title="Отчет"><i class="bi bi-file-text"></i></a>
+    </div>
+
+    <div class="main-container">
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <h1><i class="bi bi-search me-3"></i>Практическое задание</h1>
+            <p class="lead mb-0">Анализ компьютерной информации средствами операционной системы (анализ системных файлов, хронология событий)</p>
+        </div>
+        
+        <div class="container-fluid p-4">
+            <div class="alert alert-info border-0 shadow-sm" role="alert">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-info-circle-fill me-3 fs-4"></i>
+                    <div>
+                        <strong>Цель:</strong> Научиться отслеживать активность пользователей, анализировать паттерны использования системных ресурсов и создавать отчеты для мониторинга безопасности в Windows и Linux.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Подготовка -->
+            <section id="preparation">
+                <h2 class="gradient-text mb-4">
+                    <i class="bi bi-gear-fill me-2"></i>Подготовка к работе
+                </h2>
+                
+                <div class="alert alert-warning border-0 shadow-sm mb-4" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
+                        <div>
+                            <strong>Важно!</strong> Перед началом работы убедитесь, что у вас есть права администратора (Windows) или sudo (Linux).
+                        </div>
+                    </div>
+                </div>
+
+                <ul class="nav nav-tabs custom-tabs mb-0" id="prepTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="windows-prep-tab" data-bs-toggle="tab" data-bs-target="#windows-prep" type="button" role="tab">
+                            <i class="bi bi-windows me-2"></i>Windows
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="linux-prep-tab" data-bs-toggle="tab" data-bs-target="#linux-prep" type="button" role="tab">
+                            <i class="bi bi-terminal me-2"></i>Linux
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="prepTabContent">
+                    <div class="tab-pane fade show active" id="windows-prep" role="tabpanel">
+                        <h4 class="text-primary mb-3">
+                            <i class="bi bi-shield-check me-2"></i>Настройка Windows
+                        </h4>
+                        <p class="mb-3">Включите аудит безопасности (запустите PowerShell от имени администратора):</p>
+                        
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="language">PowerShell</span>
+                                <button class="copy-btn" onclick="copyCode(this)">
+                                    <i class="bi bi-clipboard me-1"></i>Копировать
+                                </button>
+                            </div>
+                            <div class="code-content">
+                                <pre># Включить аудит входов и выходов
+auditpol /set /subcategory:"Logon" /success:enable /failure:enable
+auditpol /set /subcategory:"Logoff" /success:enable
+
+# Включить аудит доступа к файлам
+auditpol /set /subcategory:"File System" /success:enable /failure:enable
+
+# Включить аудит использования привилегий
+auditpol /set /subcategory:"Sensitive Privilege Use" /success:enable /failure:enable</pre>
+                            </div>
+                        </div>
+                        
+                        <p class="mb-3 mt-4">Создайте рабочие папки:</p>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="language">Command Prompt</span>
+                                <button class="copy-btn" onclick="copyCode(this)">
+                                    <i class="bi bi-clipboard me-1"></i>Копировать
+                                </button>
+                            </div>
+                            <div class="code-content">
+                                <pre>mkdir C:\temp\analysis
+mkdir C:\temp\analysis\reports</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="linux-prep" role="tabpanel">
+                        <h4 class="text-success mb-3">
+                            <i class="bi bi-terminal me-2"></i>Настройка Linux
+                        </h4>
+                        <p class="mb-3">Установите необходимые инструменты:</p>
+                        
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="language">Bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">
+                                    <i class="bi bi-clipboard me-1"></i>Копировать
+                                </button>
+                            </div>
+                            <div class="code-content">
+                                <pre># Ubuntu/Debian
+sudo apt update
+sudo apt install htop iotop lsof net-tools
+
+# CentOS/RHEL
+sudo yum install htop iotop lsof net-tools</pre>
+                            </div>
+                        </div>
+                        
+                        <p class="mb-3 mt-4">Создайте рабочие папки:</p>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="language">Bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">
+                                    <i class="bi bi-clipboard me-1"></i>Копировать
+                                </button>
+                            </div>
+                            <div class="code-content">
+                                <pre>mkdir -p ~/analysis/reports
+chmod 755 ~/analysis</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Задание 1 -->
+            <section id="task1" class="mt-5">
+                <h2 class="gradient-text mb-4">
+                    <i class="bi bi-person-check-fill me-2"></i>Задание 1: Анализ активности пользователей
+                </h2>
+                
+                <div class="card task-card">
+                    <div class="task-header">
+                        <h3 class="mb-0">
+                            <i class="bi bi-bullseye me-2"></i>Что нужно сделать:
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Найти все входы и выходы пользователей за последнюю неделю</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Определить паттерны рабочего времени</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Выявить подозрительную активность (ночные входы, неудачные попытки)</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Создать отчет с графиками активности</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card task-card">
+                    <div class="answer-header">
+                        <h3 class="mb-0">
+                            <i class="bi bi-check-square me-2"></i>Как выполнить:
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs custom-tabs mb-0" id="task1Tabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="task1-windows-tab" data-bs-toggle="tab" data-bs-target="#task1-windows" type="button" role="tab">
+                                    <i class="bi bi-windows me-2"></i>Windows
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="task1-linux-tab" data-bs-toggle="tab" data-bs-target="#task1-linux" type="button" role="tab">
+                                    <i class="bi bi-terminal me-2"></i>Linux
+                                </button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content" id="task1TabContent">
+                            <div class="tab-pane fade show active" id="task1-windows" role="tabpanel">
+                                <h4 class="text-primary mb-3">Анализ входов пользователей (PowerShell):</h4>
+                                
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">PowerShell</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Успешные входы пользователей
+Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4624} | 
+Select-Object TimeCreated, @{Name='User';Expression={$_.Properties[5].Value}}, @{Name='LogonType';Expression={$_.Properties[8].Value}} | 
+Format-Table -AutoSize</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">PowerShell</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Неудачные попытки входа
+Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4625} | 
+Select-Object TimeCreated, @{Name='User';Expression={$_.Properties[5].Value}} | 
+Format-Table -AutoSize</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">PowerShell</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Экспорт данных для анализа
+Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4624,4625} | 
+Select-Object TimeCreated, Id, @{Name='User';Expression={$_.Properties[5].Value}} | 
+Export-Csv -Path "C:\temp\analysis\user_activity.csv" -NoTypeInformation</pre>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info border-0 mt-3">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <strong>Объяснение:</strong> Event ID 4624 = успешный вход, 4625 = неудачная попытка входа. Данные экспортируются в CSV для создания графиков в Excel.
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="task1-linux" role="tabpanel">
+                                <h4 class="text-success mb-3">Анализ входов пользователей:</h4>
+                                
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">Bash</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Последние входы пользователей
+last -n 50</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">Bash</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Неудачные попытки входа
+lastb -n 20</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">Bash</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># SSH подключения
+grep "sshd" /var/log/auth.log | grep "Accepted\|Failed" | tail -20</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">Bash</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Экспорт данных
+last -n 100 > ~/analysis/user_logins.txt
+grep "sshd" /var/log/auth.log | grep "Accepted\|Failed" > ~/analysis/ssh_activity.txt</pre>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info border-0 mt-3">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <strong>Объяснение:</strong> Команда `last` показывает историю входов, `lastb` - неудачные попытки, grep ищет SSH активность в логах.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Задание 2 -->
+            <section id="task2" class="mt-5">
+                <h2 class="gradient-text mb-4">
+                    <i class="bi bi-cpu-fill me-2"></i>Задание 2: Анализ процессов и производительности
+                </h2>
+                
+                <div class="card task-card">
+                    <div class="task-header">
+                        <h3 class="mb-0">
+                            <i class="bi bi-bullseye me-2"></i>Что нужно сделать:
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Найти процессы, потребляющие больше всего ресурсов</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Определить процессы, запущенные пользователями</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Выявить подозрительные процессы</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Создать отчет о производительности системы</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card task-card">
+                    <div class="answer-header">
+                        <h3 class="mb-0">
+                            <i class="bi bi-check-square me-2"></i>Как выполнить:
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs custom-tabs mb-0" id="task2Tabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="task2-windows-tab" data-bs-toggle="tab" data-bs-target="#task2-windows" type="button" role="tab">
+                                    <i class="bi bi-windows me-2"></i>Windows
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="task2-linux-tab" data-bs-toggle="tab" data-bs-target="#task2-linux" type="button" role="tab">
+                                    <i class="bi bi-terminal me-2"></i>Linux
+                                </button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content" id="task2TabContent">
+                            <div class="tab-pane fade show active" id="task2-windows" role="tabpanel">
+                                <h4 class="text-primary mb-3">Анализ процессов (PowerShell):</h4>
+                                
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">PowerShell</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Топ процессов по памяти
+Get-Process | Sort-Object WorkingSet -Descending | Select-Object -First 10 Name, Id, WorkingSet, CPU</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">PowerShell</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Процессы с высоким CPU
+Get-Process | Sort-Object CPU -Descending | Select-Object -First 10 Name, Id, CPU, WorkingSet</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">PowerShell</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Экспорт данных о процессах
+Get-Process | Select-Object Name, Id, WorkingSet, CPU, StartTime | 
+Export-Csv -Path "C:\temp\analysis\processes.csv" -NoTypeInformation</pre>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info border-0 mt-3">
+                                    <i class="bi bi-lightbulb me-2"></i>
+                                    <strong>Совет:</strong> Откройте Диспетчер задач (Ctrl+Shift+Esc) для визуального анализа процессов.
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="task2-linux" role="tabpanel">
+                                <h4 class="text-success mb-3">Анализ процессов:</h4>
+                                
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">Bash</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Интерактивный мониторинг процессов
+htop</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">Bash</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Топ процессов по CPU
+ps aux --sort=-%cpu | head -10</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">Bash</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Топ процессов по памяти
+ps aux --sort=-%mem | head -10</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">Bash</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Экспорт данных о процессах
+ps aux > ~/analysis/processes.txt
+ps aux --sort=-%cpu | head -20 > ~/analysis/top_cpu_processes.txt</pre>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info border-0 mt-3">
+                                    <i class="bi bi-lightbulb me-2"></i>
+                                    <strong>Совет:</strong> В htop используйте F6 для сортировки, F9 для завершения процессов.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Задание 3 -->
+            <section id="task3" class="mt-5">
+                <h2 class="gradient-text mb-4">
+                    <i class="bi bi-wifi me-2"></i>Задание 3: Анализ сетевых соединений
+                </h2>
+                
+                <div class="card task-card">
+                    <div class="task-header">
+                        <h3 class="mb-0">
+                            <i class="bi bi-bullseye me-2"></i>Что нужно сделать:
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Найти все активные сетевые соединения</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Определить процессы, использующие сеть</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Выявить подозрительные соединения</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Создать карту сетевой активности</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card task-card">
+                    <div class="answer-header">
+                        <h3 class="mb-0">
+                            <i class="bi bi-check-square me-2"></i>Как выполнить:
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs custom-tabs mb-0" id="task3Tabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="task3-windows-tab" data-bs-toggle="tab" data-bs-target="#task3-windows" type="button" role="tab">
+                                    <i class="bi bi-windows me-2"></i>Windows
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="task3-linux-tab" data-bs-toggle="tab" data-bs-target="#task3-linux" type="button" role="tab">
+                                    <i class="bi bi-terminal me-2"></i>Linux
+                                </button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content" id="task3TabContent">
+                            <div class="tab-pane fade show active" id="task3-windows" role="tabpanel">
+                                <h4 class="text-primary mb-3">Анализ сетевых соединений (PowerShell):</h4>
+                                
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">PowerShell</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Активные TCP соединения
+Get-NetTCPConnection | Select-Object LocalAddress, LocalPort, RemoteAddress, RemotePort, State, OwningProcess</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">PowerShell</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Соединения с именами процессов
+Get-NetTCPConnection | Select-Object LocalAddress, LocalPort, RemoteAddress, RemotePort, State, 
+@{Name="ProcessName";Expression={(Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue).ProcessName}}</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">PowerShell</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Экспорт сетевых данных
+Get-NetTCPConnection | Select-Object LocalAddress, LocalPort, RemoteAddress, RemotePort, State | 
+Export-Csv -Path "C:\temp\analysis\network_connections.csv" -NoTypeInformation</pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="task3-linux" role="tabpanel">
+                                <h4 class="text-success mb-3">Анализ сетевых соединений:</h4>
+                                
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">Bash</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Активные соединения с процессами
+ss -tulpn</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">Bash</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Альтернативный способ
+netstat -tulpn</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">Bash</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Процессы с сетевой активностью
+lsof -i</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">Bash</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Экспорт сетевых данных
+ss -tulpn > ~/analysis/network_connections.txt
+lsof -i > ~/analysis/network_processes.txt</pre>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info border-0 mt-3">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <strong>Объяснение:</strong> ss - современная замена netstat, lsof показывает открытые файлы и сетевые соединения.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Задание 4 -->
+            <section id="task4" class="mt-5">
+                <h2 class="gradient-text mb-4">
+                    <i class="bi bi-pc-display me-2"></i>Задание 4: Системная инвентаризация
+                </h2>
+                
+                <div class="card task-card">
+                    <div class="task-header">
+                        <h3 class="mb-0">
+                            <i class="bi bi-bullseye me-2"></i>Что нужно сделать:
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Собрать информацию о системе и оборудовании</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Получить список установленного ПО</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Проанализировать конфигурацию системы</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Создать полный отчет о системе</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card task-card">
+                    <div class="answer-header">
+                        <h3 class="mb-0">
+                            <i class="bi bi-check-square me-2"></i>Как выполнить:
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs custom-tabs mb-0" id="task4Tabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="task4-windows-tab" data-bs-toggle="tab" data-bs-target="#task4-windows" type="button" role="tab">
+                                    <i class="bi bi-windows me-2"></i>Windows
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="task4-linux-tab" data-bs-toggle="tab" data-bs-target="#task4-linux" type="button" role="tab">
+                                    <i class="bi bi-terminal me-2"></i>Linux
+                                </button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content" id="task4TabContent">
+                            <div class="tab-pane fade show active" id="task4-windows" role="tabpanel">
+                                <h4 class="text-primary mb-3">Системная информация (PowerShell):</h4>
+                                
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">PowerShell</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Общая информация о системе
+Get-ComputerInfo | Select-Object WindowsProductName, WindowsVersion, TotalPhysicalMemory</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">PowerShell</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Информация о процессоре
+Get-WmiObject -Class Win32_Processor | Select-Object Name, NumberOfCores, MaxClockSpeed</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">PowerShell</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Установленные программы
+Get-WmiObject -Class Win32_Product | Select-Object Name, Version, InstallDate | Sort-Object Name</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">PowerShell</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Экспорт системной информации
+Get-ComputerInfo | Export-Csv -Path "C:\temp\analysis\system_info.csv" -NoTypeInformation</pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="task4-linux" role="tabpanel">
+                                <h4 class="text-success mb-3">Системная информация:</h4>
+                                
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">Bash</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Информация о системе
+hostnamectl</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">Bash</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Информация о процессоре
+lscpu</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">Bash</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Информация о памяти
+free -h</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">Bash</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Дисковое пространство
+df -h</pre>
+                                    </div>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="language">Bash</span>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="bi bi-clipboard me-1"></i>Копировать
+                                        </button>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre># Создание системного отчета
+echo "=== System Report ===" > ~/analysis/system_report.txt
+echo "Date: $(date)" >> ~/analysis/system_report.txt
+echo "" >> ~/analysis/system_report.txt
+hostnamectl >> ~/analysis/system_report.txt
+echo "" >> ~/analysis/system_report.txt
+lscpu | head -10 >> ~/analysis/system_report.txt</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Создание отчета -->
+            <section id="report" class="mt-5">
+                <h2 class="gradient-text mb-4">
+                    <i class="bi bi-file-text me-2"></i>Создание отчета
+                </h2>
+                
+                <div class="card task-card">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">
+                            <i class="bi bi-list-check me-2"></i>Контрольный список для отчета:
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span>Титульный лист с названием работы и ФИО</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span>Введение с описанием целей</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span>Результаты каждого задания со скриншотами</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span>Анализ найденных данных</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span>Выводы и рекомендации</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span>Приложения с экспортированными данными</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info border-0 shadow-sm mt-4">
+                    <div class="d-flex align-items-start">
+                        <i class="bi bi-lightbulb me-3 fs-4 text-warning"></i>
+                        <div>
+                            <strong>Совет по визуализации:</strong> Используйте Excel или LibreOffice Calc для создания графиков из экспортированных CSV файлов. Создайте временные диаграммы активности пользователей и круговые диаграммы использования ресурсов.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Работа с данными в Excel -->
+                <div class="card task-card mt-4">
+                    <div class="card-header bg-success text-white">
+                        <h3 class="mb-0">
+                            <i class="bi bi-file-earmark-excel me-2"></i>Пошаговая работа с экспортированными данными в Excel
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info border-0 mb-4">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Цель:</strong> Создать наглядные графики и отчеты на основе собранных данных для анализа активности пользователей и производительности системы.
+                        </div>
+
+                        <h5 class="text-primary mb-3">
+                            <i class="bi bi-1-circle me-2"></i>Шаг 1: Подготовка данных
+                        </h5>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Откройте Excel</strong> и создайте новую книгу с названием "Анализ_системы_[дата]"</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Импортируйте CSV файлы:</strong> Данные → Получить данные → Из файла → Из текста/CSV</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Создайте отдельные листы:</strong> "Активность_пользователей", "Процессы", "Сеть", "Система"</span>
+                        </div>
+
+                        <h5 class="text-primary mb-3 mt-4">
+                            <i class="bi bi-2-circle me-2"></i>Шаг 2: Анализ активности пользователей
+                        </h5>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Импортируйте user_activity.csv</strong> на лист "Активность_пользователей"</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Создайте столбец "Час":</strong> Используйте формулу =ЧАС(A2) для извлечения часа из времени</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Создайте столбец "День недели":</strong> Используйте формулу =ТЕКСТ(A2;"дддд") для получения дня недели</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Создайте сводную таблицу:</strong> Вставка → Сводная таблица → Строки: Час, Значения: Количество записей</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Постройте график активности по часам:</strong> Выделите сводную таблицу → Вставка → Гистограмма</span>
+                        </div>
+
+                        <h5 class="text-primary mb-3 mt-4">
+                            <i class="bi bi-3-circle me-2"></i>Шаг 3: Анализ процессов
+                        </h5>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Импортируйте processes.csv</strong> на лист "Процессы"</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Отсортируйте по WorkingSet:</strong> Выделите данные → Данные → Сортировка → По убыванию</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Создайте топ-10 процессов:</strong> Скопируйте первые 10 строк в новую область</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Постройте круговую диаграмму:</strong> Выделите Name и WorkingSet → Вставка → Круговая диаграмма</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Добавьте подписи данных:</strong> Щелкните диаграмму → + → Подписи данных → Процент</span>
+                        </div>
+
+                        <h5 class="text-primary mb-3 mt-4">
+                            <i class="bi bi-4-circle me-2"></i>Шаг 4: Анализ сетевых соединений
+                        </h5>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Импортируйте network_connections.csv</strong> на лист "Сеть"</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Создайте сводную таблицу по портам:</strong> Строки: LocalPort, Значения: Количество соединений</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Постройте график топ-портов:</strong> Выберите топ-15 портов → Гистограмма</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Создайте таблицу внешних IP:</strong> Отфильтруйте RemoteAddress, исключив локальные адреса (127.*, 192.168.*, 10.*)</span>
+                        </div>
+
+                        <h5 class="text-primary mb-3 mt-4">
+                            <i class="bi bi-5-circle me-2"></i>Шаг 5: Создание дашборда
+                        </h5>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Создайте лист "Дашборд"</strong> для размещения всех графиков</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Скопируйте графики:</strong> Выделите график → Ctrl+C → Перейдите на "Дашборд" → Ctrl+V</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Расположите графики:</strong> 2x2 сетка - активность пользователей, топ процессы, сетевые порты, системная информация</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Добавьте заголовки:</strong> Вставка → Текстовое поле → "Анализ системы от [дата]"</span>
+                        </div>
+
+                        <h5 class="text-primary mb-3 mt-4">
+                            <i class="bi bi-6-circle me-2"></i>Шаг 6: Создание отчетных таблиц
+                        </h5>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Создайте таблицу "Подозрительная активность":</strong> Входы в нерабочее время (22:00-06:00)</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Создайте таблицу "Ресурсоемкие процессы":</strong> Процессы с потреблением памяти >100MB</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Создайте таблицу "Внешние соединения":</strong> Все соединения с внешними IP-адресами</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Добавьте условное форматирование:</strong> Выделите критичные значения красным цветом</span>
+                        </div>
+
+                        <h5 class="text-primary mb-3 mt-4">
+                            <i class="bi bi-7-circle me-2"></i>Шаг 7: Финальное оформление
+                        </h5>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Создайте лист "Выводы"</strong> с текстовым анализом результатов</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Добавьте рекомендации:</strong> Список действий для улучшения безопасности и производительности</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Сохраните файл:</strong> Файл → Сохранить как → "Анализ_системы_[дата].xlsx"</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Экспортируйте дашборд в PDF:</strong> Файл → Экспорт → Создать PDF/XPS</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-success border-0 shadow-sm mt-4">
+                    <div class="d-flex align-items-start">
+                        <i class="bi bi-lightbulb me-3 fs-4 text-warning"></i>
+                        <div>
+                            <strong>Полезные формулы Excel для анализа:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li><strong>=ЧАС(A2)</strong> - извлечение часа из даты/времени</li>
+                                <li><strong>=ТЕКСТ(A2;"дддд")</strong> - получение дня недели</li>
+                                <li><strong>=СЧЁТЕСЛИ(B:B;">100000000")</strong> - подсчет процессов с памятью >100MB</li>
+                                <li><strong>=ЕСЛИ(ИЛИ(ЧАС(A2)<6;ЧАС(A2)>22);"Подозрительно";"Норма")</strong> - выявление активности в нерабочее время</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning border-0 shadow-sm">
+                    <div class="d-flex align-items-start">
+                        <i class="bi bi-shield-exclamation me-3 fs-4"></i>
+                        <div>
+                            <strong>Важно для безопасности:</strong> Все собранные данные содержат конфиденциальную информацию. Убедитесь, что отчеты хранятся в безопасном месте и доступны только авторизованным лицам.
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Local Bootstrap JS -->
+    <script src="./assets/js/bootstrap.bundle.min.js"></script>
+    <!-- Local Prism.js для подсветки синтаксиса -->
+    <script src="./assets/js/prism-core.min.js"></script>
+    <script src="./assets/js/prism-autoloader.min.js"></script>
+    
+    <script>
+        // Функция копирования кода
+        function copyCode(button) {
+            const codeBlock = button.closest('.code-block');
+            const codeContent = codeBlock.querySelector('.code-content pre') || codeBlock.querySelector('pre');
+            const text = codeContent.textContent;
+            
+            navigator.clipboard.writeText(text).then(function() {
+                const originalContent = button.innerHTML;
+                button.innerHTML = '<i class="bi bi-check me-1"></i>Скопировано!';
+                button.style.background = '#198754';
+                
+                setTimeout(function() {
+                    button.innerHTML = originalContent;
+                    button.style.background = '#3182ce';
+                }, 2000);
+            }).catch(function() {
+                // Fallback для старых браузеров
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                const originalContent = button.innerHTML;
+                button.innerHTML = '<i class="bi bi-check me-1"></i>Скопировано!';
+                button.style.background = '#198754';
+                
+                setTimeout(function() {
+                    button.innerHTML = originalContent;
+                    button.style.background = '#3182ce';
+                }, 2000);
+            });
+        }
+
+        // Плавная прокрутка для навигации
+        document.querySelectorAll('.floating-nav a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Функция для чекбоксов в чек-листе
+        function toggleCheckbox(checkbox) {
+            if (checkbox.innerHTML === '') {
+                checkbox.innerHTML = '<i class="bi bi-check text-success"></i>';
+                checkbox.style.borderColor = '#198754';
+                checkbox.style.background = '#d1e7dd';
+            } else {
+                checkbox.innerHTML = '';
+                checkbox.style.borderColor = '#6c757d';
+                checkbox.style.background = 'transparent';
+            }
+        }
+
+        // Инициализация подсветки синтаксиса
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof Prism !== 'undefined') {
+                Prism.highlightAll();
+            }
+        });
+
+
+    </script>
+</body>
+</html> 
