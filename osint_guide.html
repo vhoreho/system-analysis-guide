@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Практическое задание: OSINT - Разведка на основе открытых источников</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Play:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Local Bootstrap CSS -->
+    <link href="./assets/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Local Bootstrap Icons -->
+    <link rel="stylesheet" href="./assets/css/bootstrap-icons.css">
+    <!-- Local Prism.js для подсветки синтаксиса -->
+    <link href="./assets/css/prism-tomorrow.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Play', sans-serif;
+        }
+        
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin: 2rem auto;
+            max-width: 1200px;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px 20px 0 0;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+        
+        .hero-section h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            border-radius: 12px;
+            position: relative;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+        
+        .code-header {
+            background: #1a202c;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #4a5568;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .code-header .language {
+            color: #a0aec0;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .copy-btn {
+            background: #3182ce;
+            color: white;
+            border: none;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .copy-btn:hover {
+            background: #2c5282;
+            transform: translateY(-1px);
+        }
+        
+        .code-content {
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        
+        .code-content pre {
+            margin: 0;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        
+        .task-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            margin: 2rem 0;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+        .task-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .task-header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 1.5rem;
+        }
+        
+        .answer-header {
+            background: linear-gradient(135deg, #00b894, #00a085);
+            color: white;
+            padding: 1.5rem;
+        }
+        
+        .custom-tabs {
+            border: none;
+            background: transparent;
+        }
+        
+        .custom-tabs .nav-link {
+            border: none;
+            border-radius: 10px 10px 0 0;
+            background: #e9ecef;
+            color: #495057;
+            font-weight: 500;
+            margin-right: 0.25rem;
+            transition: all 0.3s ease;
+        }
+        
+        .custom-tabs .nav-link.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+        }
+        
+        .tab-content {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 0 10px 10px 10px;
+            padding: 1.5rem;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.2s;
+        }
+        
+        .checklist-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+        
+        .checklist-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #6c757d;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .checklist-checkbox:hover {
+            border-color: #0d6efd;
+            background: #e7f3ff;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .floating-nav {
+            position: fixed;
+            top: 50%;
+            right: 2rem;
+            transform: translateY(-50%);
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .floating-nav a {
+            display: block;
+            padding: 0.5rem;
+            color: #495057;
+            text-decoration: none;
+            border-radius: 8px;
+            margin: 0.25rem 0;
+            transition: all 0.2s;
+        }
+        
+        .floating-nav a:hover {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .tool-link {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0.25rem;
+            transition: all 0.3s ease;
+        }
+        
+        .tool-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+        
+        @media (max-width: 768px) {
+            .floating-nav {
+                display: none;
+            }
+            
+            .hero-section h1 {
+                font-size: 2rem;
+            }
+            
+            .main-container {
+                margin: 1rem;
+                border-radius: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Navigation -->
+    <div class="floating-nav d-none d-lg-block">
+        <a href="#introduction" title="Введение"><i class="bi bi-info-circle"></i></a>
+        <a href="#task1" title="Социальные сети"><i class="bi bi-people"></i></a>
+        <a href="#task2" title="Поиск по никнейму"><i class="bi bi-search"></i></a>
+        <a href="#task3" title="Анализ медиа"><i class="bi bi-camera"></i></a>
+        <a href="#report" title="Отчет"><i class="bi bi-file-text"></i></a>
+    </div>
+
+    <div class="main-container">
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <h1><i class="bi bi-eye me-3"></i>Практическое задание</h1>
+            <p class="lead mb-0">OSINT - Разведка на основе открытых источников</p>
+        </div>
+        
+        <div class="container-fluid p-4">
+            <div class="alert alert-info border-0 shadow-sm" role="alert">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-info-circle-fill me-3 fs-4"></i>
+                    <div>
+                        <strong>Цель:</strong> Изучить методы сбора и анализа информации из открытых источников, освоить инструменты OSINT и научиться создавать аналитические отчеты.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Введение в OSINT -->
+            <section id="introduction">
+                <h2 class="gradient-text mb-4">
+                    <i class="bi bi-lightbulb-fill me-2"></i>Введение в OSINT
+                </h2>
+                
+                <div class="card task-card">
+                    <div class="task-header">
+                        <h3 class="mb-0">
+                            <i class="bi bi-question-circle me-2"></i>Что такое OSINT?
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Open Source Intelligence (OSINT)</strong> — сбор, анализ и обработка общедоступной информации из открытых источников.</p>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <h5 class="text-primary">Источники OSINT:</h5>
+                                <ul>
+                                    <li>Социальные сети и форумы</li>
+                                    <li>Поисковые системы</li>
+                                    <li>Публичные базы данных</li>
+                                    <li>Новостные сайты</li>
+                                    <li>Государственные реестры</li>
+                                    <li>Метаданные файлов</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="text-success">Применение OSINT:</h5>
+                                <ul>
+                                    <li>Кибербезопасность</li>
+                                    <li>Журналистские расследования</li>
+                                    <li>Проверка информации</li>
+                                    <li>Конкурентная разведка</li>
+                                    <li>Поиск пропавших людей</li>
+                                    <li>Борьба с мошенничеством</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="warning-box mt-4">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <strong>Важно!</strong> Все действия должны выполняться в рамках закона и этических норм. Не нарушайте приватность и права людей.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card task-card">
+                    <div class="answer-header">
+                        <h3 class="mb-0">
+                            <i class="bi bi-tools me-2"></i>Основные инструменты OSINT
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="text-primary mb-3">Фреймворки и коллекции инструментов:</h5>
+                        <div class="mb-3">
+                            <a href="https://osintframework.com" class="tool-link" target="_blank">
+                                <i class="bi bi-diagram-3 me-2"></i>OSINT Framework
+                            </a>
+                            <a href="https://inteltechniques.com" class="tool-link" target="_blank">
+                                <i class="bi bi-book me-2"></i>Intel Techniques
+                            </a>
+                            <a href="https://github.com/jivoi/awesome-osint" class="tool-link" target="_blank">
+                                <i class="bi bi-github me-2"></i>Awesome OSINT
+                            </a>
+                        </div>
+
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span>Изучите структуру OSINT Framework и найдите 5 инструментов для анализа социальных сетей</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span>Ознакомьтесь с ресурсами Intel Techniques и выберите инструменты для поиска по email</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Задание 1: Социальные сети -->
+            <section id="task1" class="mt-5">
+                <h2 class="gradient-text mb-4">
+                    <i class="bi bi-people-fill me-2"></i>Задание 1: Анализ социальных сетей
+                </h2>
+                
+                <div class="card task-card">
+                    <div class="task-header">
+                        <h3 class="mb-0">
+                            <i class="bi bi-bullseye me-2"></i>Что нужно сделать:
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Найти информацию о пользователе ВКонтакте</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Проанализировать связи и активность</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Найти Discord серверы по тематике</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Исследовать YouTube каналы</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card task-card">
+                    <div class="answer-header">
+                        <h3 class="mb-0">
+                            <i class="bi bi-check-square me-2"></i>Инструменты для анализа ВКонтакте:
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5 class="text-primary mb-3">Основные инструменты:</h5>
+                                <div class="mb-3">
+                                    <a href="https://220vk.com" class="tool-link" target="_blank">
+                                        <i class="bi bi-search me-2"></i>220VK
+                                    </a>
+                                    <small class="d-block text-muted">Поиск и анализ профилей ВК</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <a href="https://vk.barkov.net" class="tool-link" target="_blank">
+                                        <i class="bi bi-graph-up me-2"></i>VK.BARKOV.NET
+                                    </a>
+                                    <small class="d-block text-muted">Анализ активности ВК</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <a href="https://regvk.com" class="tool-link" target="_blank">
+                                        <i class="bi bi-calendar me-2"></i>REGVK
+                                    </a>
+                                    <small class="d-block text-muted">Определение даты регистрации</small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h5 class="text-success mb-3">Дополнительные сервисы:</h5>
+                                <div class="mb-3">
+                                    <a href="https://yasiv.com" class="tool-link" target="_blank">
+                                        <i class="bi bi-diagram-2 me-2"></i>YASIV
+                                    </a>
+                                    <small class="d-block text-muted">Визуализация связей</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <a href="https://photo-map.ru" class="tool-link" target="_blank">
+                                        <i class="bi bi-geo-alt me-2"></i>PHOTO MAP
+                                    </a>
+                                    <small class="d-block text-muted">Поиск фото по геолокации</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h5 class="text-primary mb-3 mt-4">Практические задания:</h5>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Задание 1.1:</strong> Проанализируйте профили https://vk.com/drop_kit1 и https://vk.com/id436696552 с помощью различных инструментов</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Задание 1.2:</strong> Найдите 10 Discord серверов по темам: программирование, кибербезопасность, игры, образование</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Задание 1.3:</strong> Исследуйте YouTube каналы: https://www.youtube.com/c/Scammers/videos и https://www.youtube.com/c/peoplepro</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Задание 1.4:</strong> Используйте Telegram-боты для OSINT анализа (соблюдайте осторожность!)</span>
+                        </div>
+
+                        <div class="alert alert-warning border-0 mt-4">
+                            <i class="bi bi-shield-exclamation me-2"></i>
+                            <strong>Telegram OSINT боты:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>@TheDataScopeBot</li>
+                                <li>OSINT-bot.net</li>
+                                <li>OSINTbot.site</li>
+                            </ul>
+                            <small class="text-muted">Внимание! Некоторые боты могут быть небезопасными. Используйте с осторожностью.</small>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Задание 2: Поиск по никнейму -->
+            <section id="task2" class="mt-5">
+                <h2 class="gradient-text mb-4">
+                    <i class="bi bi-search me-2"></i>Задание 2: Поиск по никнейму и идентификаторам
+                </h2>
+                
+                <div class="card task-card">
+                    <div class="task-header">
+                        <h3 class="mb-0">
+                            <i class="bi bi-bullseye me-2"></i>Что нужно сделать:
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Найти аккаунты по никнейму на разных платформах</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Проанализировать ID пользователей</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Использовать автоматизированные инструменты</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Создать карту цифрового следа</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card task-card">
+                    <div class="answer-header">
+                        <h3 class="mb-0">
+                            <i class="bi bi-tools me-2"></i>Snoop Project - мощный инструмент поиска
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info border-0 mb-4">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Snoop Project</strong> - инструмент для автоматического поиска аккаунтов пользователя по никнейму на 800+ платформах.
+                        </div>
+
+                        <h5 class="text-primary mb-3">Установка и использование Snoop Project:</h5>
+                        
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="language">Windows CMD</span>
+                                <button class="copy-btn" onclick="copyCode(this)">
+                                    <i class="bi bi-clipboard me-1"></i>Копировать
+                                </button>
+                            </div>
+                            <div class="code-content">
+                                <pre># Скачайте архив с GitHub: https://github.com/snooppr/snoop
+# Распакуйте в удобную папку
+# Откройте командную строку в папке со Snoop</pre>
+                            </div>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="language">Команды Snoop</span>
+                                <button class="copy-btn" onclick="copyCode(this)">
+                                    <i class="bi bi-clipboard me-1"></i>Копировать
+                                </button>
+                            </div>
+                            <div class="code-content">
+                                <pre># Базовый поиск по никнейму
+snoop.exe username
+
+# Поиск с фильтром по стране (Россия)
+snoop.exe -f admin -t 9
+
+# Поиск с сохранением в HTML
+snoop.exe username --html
+
+# Поиск только в топ-сайтах
+snoop.exe username --top</pre>
+                            </div>
+                        </div>
+
+                        <h5 class="text-success mb-3 mt-4">Альтернативные онлайн-сервисы:</h5>
+                        <div class="mb-3">
+                            <a href="https://socialsearcher.com" class="tool-link" target="_blank">
+                                <i class="bi bi-search me-2"></i>Social Searcher
+                            </a>
+                            <a href="https://namecheckup.com" class="tool-link" target="_blank">
+                                <i class="bi bi-check-circle me-2"></i>Namecheckup
+                            </a>
+                            <a href="https://whatsmyname.app" class="tool-link" target="_blank">
+                                <i class="bi bi-person-check me-2"></i>WhatsMyName
+                            </a>
+                        </div>
+
+                        <h5 class="text-primary mb-3 mt-4">Понимание ID различных платформ:</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul>
+                                    <li><strong>VK:</strong> https://vk.com/id123456</li>
+                                    <li><strong>Telegram:</strong> @username или ID</li>
+                                    <li><strong>WhatsApp/Viber:</strong> номер телефона</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul>
+                                    <li><strong>Instagram:</strong> уникальный username</li>
+                                    <li><strong>Discord:</strong> username#1234</li>
+                                    <li><strong>GitHub:</strong> github.com/username</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <h5 class="text-primary mb-3 mt-4">Практические задания:</h5>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Задание 2.1:</strong> Используйте Snoop Project для поиска аккаунтов по никнейму "admin", "test", "user"</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Задание 2.2:</strong> Сравните результаты Snoop с онлайн-сервисами для одного никнейма</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Задание 2.3:</strong> Создайте таблицу найденных аккаунтов с указанием платформы и активности</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Задание 3: Анализ медиафайлов -->
+            <section id="task3" class="mt-5">
+                <h2 class="gradient-text mb-4">
+                    <i class="bi bi-camera-fill me-2"></i>Задание 3: Анализ медиафайлов и дипфейков
+                </h2>
+                
+                <div class="card task-card">
+                    <div class="task-header">
+                        <h3 class="mb-0">
+                            <i class="bi bi-bullseye me-2"></i>Что нужно сделать:
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Проверить подлинность изображений</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Извлечь метаданные из файлов</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Выявить признаки дипфейков</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-check-circle text-success me-3 fs-5"></i>
+                                    <span>Найти оригинальные источники</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card task-card">
+                    <div class="answer-header">
+                        <h3 class="mb-0">
+                            <i class="bi bi-shield-check me-2"></i>Инструменты для анализа медиафайлов
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="text-primary mb-3">1. Поиск по изображению:</h5>
+                        <div class="mb-3">
+                            <a href="https://images.google.com" class="tool-link" target="_blank">
+                                <i class="bi bi-google me-2"></i>Google Images
+                            </a>
+                            <a href="https://yandex.ru/images" class="tool-link" target="_blank">
+                                <i class="bi bi-search me-2"></i>Yandex Images
+                            </a>
+                            <a href="https://tineye.com" class="tool-link" target="_blank">
+                                <i class="bi bi-eye me-2"></i>TinEye
+                            </a>
+                        </div>
+
+                        <h5 class="text-success mb-3">2. Анализ метаданных:</h5>
+                        <div class="mb-3">
+                            <a href="https://exifdata.com" class="tool-link" target="_blank">
+                                <i class="bi bi-info-circle me-2"></i>View EXIF Data
+                            </a>
+                            <a href="https://www.metadata2go.com" class="tool-link" target="_blank">
+                                <i class="bi bi-file-earmark-text me-2"></i>Metadata2go
+                            </a>
+                            <a href="https://citizenevidence.amnestyusa.org" class="tool-link" target="_blank">
+                                <i class="bi bi-youtube me-2"></i>YouTube DataViewer
+                            </a>
+                        </div>
+
+                        <h5 class="text-warning mb-3">3. Детекция дипфейков:</h5>
+                        <div class="mb-3">
+                            <a href="https://deepware.ai" class="tool-link" target="_blank">
+                                <i class="bi bi-shield-exclamation me-2"></i>Deepware Scanner
+                            </a>
+                            <a href="https://hivemoderation.com" class="tool-link" target="_blank">
+                                <i class="bi bi-robot me-2"></i>Hive AI Detector
+                            </a>
+                        </div>
+
+                        <div class="alert alert-warning border-0 mt-4">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <strong>Важно знать признаки дипфейков:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Неестественные движения глаз и моргание</li>
+                                <li>Размытые границы лица</li>
+                                <li>Несоответствие освещения</li>
+                                <li>Артефакты сжатия видео</li>
+                                <li>Неестественная синхронизация губ и речи</li>
+                            </ul>
+                        </div>
+
+                        <h5 class="text-primary mb-3 mt-4">Практические задания:</h5>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Задание 3.1:</strong> Найдите 5 изображений в интернете и проверьте их на подлинность с помощью обратного поиска</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Задание 3.2:</strong> Извлеките EXIF-данные из 3 фотографий и проанализируйте информацию о камере, дате, геолокации</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Задание 3.3:</strong> Найдите примеры дипфейк-видео и проанализируйте их с помощью детекторов</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Задание 3.4:</strong> Создайте чек-лист признаков для выявления поддельных медиафайлов</span>
+                        </div>
+
+                        <div class="code-block mt-4">
+                            <div class="code-header">
+                                <span class="language">EXIF анализ</span>
+                                <button class="copy-btn" onclick="copyCode(this)">
+                                    <i class="bi bi-clipboard me-1"></i>Копировать
+                                </button>
+                            </div>
+                            <div class="code-content">
+                                <pre># Основные EXIF поля для анализа:
+- Camera Make/Model (производитель/модель камеры)
+- Date/Time Original (дата и время съемки)
+- GPS Coordinates (координаты GPS)
+- Software (программа обработки)
+- Image Dimensions (размеры изображения)
+- ISO Speed (чувствительность ISO)
+- Focal Length (фокусное расстояние)</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Создание отчета -->
+            <section id="report" class="mt-5">
+                <h2 class="gradient-text mb-4">
+                    <i class="bi bi-file-text me-2"></i>Создание OSINT отчета
+                </h2>
+                
+                <div class="card task-card">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">
+                            <i class="bi bi-list-check me-2"></i>Структура OSINT отчета:
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Титульный лист</strong> - название исследования, дата, автор</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Исполнительное резюме</strong> - краткие выводы и ключевые находки</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Цели и задачи</strong> - что искали и зачем</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Методология</strong> - какие инструменты и методы использовались</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Результаты исследования</strong> - детальные находки по каждому заданию</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Анализ и выводы</strong> - интерпретация найденной информации</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Рекомендации</strong> - предложения по дальнейшим действиям</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Приложения</strong> - скриншоты, таблицы, схемы связей</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card task-card">
+                    <div class="card-header bg-success text-white">
+                        <h3 class="mb-0">
+                            <i class="bi bi-diagram-2 me-2"></i>Визуализация данных OSINT
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="text-primary mb-3">Рекомендуемые инструменты для визуализации:</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <a href="https://www.maltego.com" class="tool-link" target="_blank">
+                                        <i class="bi bi-diagram-3 me-2"></i>Maltego
+                                    </a>
+                                    <small class="d-block text-muted">Профессиональная платформа для анализа связей</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <a href="https://gephi.org" class="tool-link" target="_blank">
+                                        <i class="bi bi-share me-2"></i>Gephi
+                                    </a>
+                                    <small class="d-block text-muted">Открытая платформа для визуализации сетей</small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <a href="https://www.lucidchart.com" class="tool-link" target="_blank">
+                                        <i class="bi bi-diagram-2 me-2"></i>Lucidchart
+                                    </a>
+                                    <small class="d-block text-muted">Онлайн-инструмент для создания диаграмм</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <a href="https://miro.com" class="tool-link" target="_blank">
+                                        <i class="bi bi-kanban me-2"></i>Miro
+                                    </a>
+                                    <small class="d-block text-muted">Интерактивная доска для мозгового штурма</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h5 class="text-success mb-3 mt-4">Типы визуализации для OSINT:</h5>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Граф связей</strong> - показывает отношения между людьми, аккаунтами, организациями</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Временная шкала</strong> - хронология событий и активности</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Географическая карта</strong> - местоположения и перемещения</span>
+                        </div>
+                        
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox" onclick="toggleCheckbox(this)"></div>
+                            <span><strong>Матрица данных</strong> - сравнение характеристик объектов</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info border-0 shadow-sm mt-4">
+                    <div class="d-flex align-items-start">
+                        <i class="bi bi-lightbulb me-3 fs-4 text-warning"></i>
+                        <div>
+                            <strong>Советы по оформлению отчета:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Используйте четкую структуру и заголовки</li>
+                                <li>Добавляйте скриншоты с пояснениями</li>
+                                <li>Указывайте источники и время сбора данных</li>
+                                <li>Соблюдайте конфиденциальность персональных данных</li>
+                                <li>Делайте выводы на основе фактов, а не предположений</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning border-0 shadow-sm">
+                    <div class="d-flex align-items-start">
+                        <i class="bi bi-shield-exclamation me-3 fs-4"></i>
+                        <div>
+                            <strong>Этические принципы OSINT:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Используйте только публично доступную информацию</li>
+                                <li>Не нарушайте законы о защите персональных данных</li>
+                                <li>Не используйте полученную информацию во вред</li>
+                                <li>Проверяйте достоверность информации из нескольких источников</li>
+                                <li>Документируйте процесс сбора данных</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Local Bootstrap JS -->
+    <script src="./assets/js/bootstrap.bundle.min.js"></script>
+    <!-- Local Prism.js для подсветки синтаксиса -->
+    <script src="./assets/js/prism-core.min.js"></script>
+    <script src="./assets/js/prism-autoloader.min.js"></script>
+    
+    <script>
+        // Функция копирования кода
+        function copyCode(button) {
+            const codeBlock = button.closest('.code-block');
+            const codeContent = codeBlock.querySelector('.code-content pre') || codeBlock.querySelector('pre');
+            const text = codeContent.textContent;
+            
+            navigator.clipboard.writeText(text).then(function() {
+                const originalContent = button.innerHTML;
+                button.innerHTML = '<i class="bi bi-check me-1"></i>Скопировано!';
+                button.style.background = '#198754';
+                
+                setTimeout(function() {
+                    button.innerHTML = originalContent;
+                    button.style.background = '#3182ce';
+                }, 2000);
+            }).catch(function() {
+                // Fallback для старых браузеров
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                const originalContent = button.innerHTML;
+                button.innerHTML = '<i class="bi bi-check me-1"></i>Скопировано!';
+                button.style.background = '#198754';
+                
+                setTimeout(function() {
+                    button.innerHTML = originalContent;
+                    button.style.background = '#3182ce';
+                }, 2000);
+            });
+        }
+
+        // Плавная прокрутка для навигации
+        document.querySelectorAll('.floating-nav a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Функция для чекбоксов в чек-листе
+        function toggleCheckbox(checkbox) {
+            if (checkbox.innerHTML === '') {
+                checkbox.innerHTML = '<i class="bi bi-check text-success"></i>';
+                checkbox.style.borderColor = '#198754';
+                checkbox.style.background = '#d1e7dd';
+            } else {
+                checkbox.innerHTML = '';
+                checkbox.style.borderColor = '#6c757d';
+                checkbox.style.background = 'transparent';
+            }
+        }
+
+        // Инициализация подсветки синтаксиса
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof Prism !== 'undefined') {
+                Prism.highlightAll();
+            }
+        });
+    </script>
+</body>
+</html> 
