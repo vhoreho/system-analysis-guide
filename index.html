@@ -18,9 +18,12 @@
     <style>
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
             min-height: 100vh;
             font-family: 'Play', sans-serif;
             overflow-x: hidden;
+            margin: 0;
+            padding: 0;
         }
         
         .hero-section {
@@ -28,6 +31,7 @@
             display: flex;
             align-items: center;
             position: relative;
+            padding: 2rem 0;
         }
         
         .hero-content {
@@ -35,10 +39,12 @@
             backdrop-filter: blur(10px);
             border-radius: 30px;
             box-shadow: 0 30px 60px rgba(0,0,0,0.2);
-            padding: 4rem;
+            padding: 3rem;
+            margin: 2rem auto;
             text-align: center;
             position: relative;
             z-index: 2;
+            max-width: 1200px;
         }
         
         .hero-title {
@@ -61,7 +67,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
             gap: 2rem;
-            margin-top: 3rem;
+            margin: 3rem 0;
         }
         
         .task-card {
@@ -218,7 +224,7 @@
             backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 2rem;
-            margin-top: 3rem;
+            margin: 3rem 0 2rem 0;
             text-align: center;
         }
         
@@ -409,23 +415,7 @@
                     </div>
                 </div>
                 
-                <!-- Footer Section -->
-                <div class="footer-section">
-                    <h5><i class="bi bi-person-workspace me-2"></i>Для преподавателей</h5>
-                    <p style="margin-bottom: 1rem; opacity: 0.9;">
-                        Подробные планы-конспекты с методическими рекомендациями
-                    </p>
-                    <div class="teacher-links">
-                        <a href="teacher_guide.md" class="teacher-link">
-                            <i class="bi bi-file-text"></i>
-                            План: Анализ системы
-                        </a>
-                        <a href="osint_teacher_guide.md" class="teacher-link">
-                            <i class="bi bi-eye-fill"></i>
-                            План: OSINT
-                        </a>
-                    </div>
-                </div>
+
             </div>
         </div>
     </div>
